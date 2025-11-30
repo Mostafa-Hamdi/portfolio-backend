@@ -12,7 +12,9 @@ const serviceRouter = require("./routers/service.js");
 const experienceRouter = require("./routers/experience.js");
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({ origin: "https://mostafadev-gamma.vercel.app", credentials: true }),
+);
 app.use(express.static(path.join(__dirname, "./assets")));
 const port = process.env.PORT || 3001;
 app.use(express.json());
