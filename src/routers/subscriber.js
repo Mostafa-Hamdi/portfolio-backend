@@ -24,5 +24,15 @@ router.get("/subscribers", auth, async (req, res, next) => {
     next(err);
   }
 });
-
+// 🟢 DELETE - Delete Subscriber by ID
+router.delete("/subscribers/:id", async (req, res) => {
+  try {
+    const service = await Subscriber.findByIdAndDelete(req.params.id);
+    if (!service)
+      return res.status(404).send({ error: "Subscriber not found" });
+    res.send({ message: "Subscriber deleted successfully" });
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
+});
 module.exports = router;

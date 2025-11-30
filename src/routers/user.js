@@ -1,5 +1,8 @@
 const { Router } = require("express");
 const { User } = require("../models/user");
+const Project = require("../models/project");
+const Service = require("../models/service");
+const Experience = require("../models/experience");
 const multer = require("multer");
 const auth = require("../middleware/auth");
 const router = new Router();
@@ -29,8 +32,19 @@ router.post("/login", async (req, res, next) => {
       req.body.password,
       res,
     );
+    const projectsCount = await Project.countDocuments();
+    const servicesCount = await Service.countDocuments();
+    const experiencesCount = await Experience.countDocuments();
     const token = await user.generateAuthToken();
-    res.send({ user, token });
+    res.send({
+      user: {
+        user,
+        projectsCount,
+        servicesCount,
+        experiencesCount,
+      },
+      token,
+    });
   } catch (Err) {
     next(Err);
   }
@@ -101,9 +115,26 @@ router.post(
   auth,
   upload.single("avatar"),
   async (req, res) => {
-    console.log(req.file);
-    res.send("ss");
+    req.user.avatar.url = `/profile/avatar/${req.user._id}`;
+    req.user.avatar.buffer = req.file.buffer;
+    req.user.avatar.type = req.file.mimetype;
+    await req.user.save();
+    res.send({ message: "File uploaded successfully" });
   },
+  (error, req, res, next) => res.status(400).send({ error: error.message }),
 );
 
+// Get profile avatar API
+router.get("/profile/avatar/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user.avatar || !user) {
+      throw new Error("user not found");
+    }
+    res.set("Content-Type", user.avatar.type);
+    res.send(user.avatar.buffer);
+  } catch (Err) {
+    res.status(404).send({ error: "File not founded" });
+  }
+});
 module.exports = router;

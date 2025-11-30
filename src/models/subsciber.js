@@ -25,11 +25,6 @@ const subscriberSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minLength: 8,
-      validate(value) {
-        if (!validator.isMobilePhone(value)) {
-          throw new Error("Invalid phone number");
-        }
-      },
     },
     message: {
       type: String,
